@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Football Match Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>⚽ Football Match Outcome Predictor</h1>
+        <form id="predictionForm">
+            <input type="number" name="home_team" placeholder="Home Team (ID)" required>
+            <input type="number" name="away_team" placeholder="Away Team (ID)" required>
+            <input type="number" step="any" name="home_team_recent_points" placeholder="Home Team Recent Points" required>
+            <input type="number" step="any" name="away_team_recent_points" placeholder="Away Team Recent Points" required>
+            <input type="number" name="year" placeholder="Year" required>
+            <input type="number" name="month" placeholder="Month" required>
+            <input type="number" name="day" placeholder="Day" required>
+            <button type="submit">Predict</button>
+        </form>
+
+        <div id="result">
+            <!-- <h2>Prediction Result:</h2> -->
+            <!-- <p id="prediction"></p>
+            <div class="bar-container">
+                <div class="bar home" id="bar-home">Home Win</div>
+                <div class="bar draw" id="bar-draw">Draw</div>
+                <div class="bar away" id="bar-away">Away Win</div>
+            </div> -->
+        </div>
+    </div>
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(response => {
+                const resultDiv = document.getElementById('result');
+                let outcome = "Unknown";
+                if (response.prediction === 0) outcome = "🏠 Home Win";
+                else if (response.prediction === 1) outcome = "⚖️ Draw";
+                else if (response.prediction === 2) outcome = "🛫 Away Win";
+
+                resultDiv.innerHTML = `
+                    <h2>✅ Predicted Outcome: ${outcome}</h2>
+                    <img src="data:image/png;base64,${response.image}" alt="Prediction Probabilities">
+                `;
+            })
+            .catch(err => {
+                document.getElementById('result').innerText = "Error: " + err;
+            });
+        });
+    </script>
+
+
+</body>
+</html>
+
+
+
+ 
+
+   
